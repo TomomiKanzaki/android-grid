@@ -47,16 +47,28 @@ public class GridViewAdapter extends BaseAdapter {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         ViewHolder viewHolder;
-        convertView = LayoutInflater.from(context).inflate(R.layout.gridview_item, null);
-        viewHolder = new ViewHolder();
-        viewHolder.tv = convertView.findViewById(R.id.textView);
+        if (convertView == null){
+            convertView = LayoutInflater.from(context).inflate(R.layout.gridview_item, null);
+            viewHolder = new ViewHolder();
+            viewHolder.tv = convertView.findViewById(R.id.textView);
+
+            convertView.setTag(viewHolder);
+        } else {
+            viewHolder = (ViewHolder) convertView.getTag();
+        }
+        /**convertViewには一列目のみ高さを50dpにしたgridViewが入っており、
+         * それを使いまわしているので、スクロールして新たな行が表示された時には高さを戻してやる必要がある*/
         if (position < list.size()){
             ViewGroup.LayoutParams lp = viewHolder.tv.getLayoutParams();
             lp.height = (int) (density * 50);
             viewHolder.tv.setLayoutParams(lp);
             viewHolder.tv.setText(list.get(position));
+        } else {
+            ViewGroup.LayoutParams lp = viewHolder.tv.getLayoutParams();
+            lp.height = (int) (density * 100);
+            viewHolder.tv.setLayoutParams(lp);
+            viewHolder.tv.setText("");
         }
-        convertView.setTag(viewHolder);
         return convertView;
     }
 

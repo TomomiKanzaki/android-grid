@@ -4,28 +4,24 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:android="http://schemas.android.com/apk/res/android" >
-    <HorizontalScrollView
-        android:id="@+id/hsv1"
-        android:background="@color/skyblue"
-        android:layout_width="match_parent"
-        android:layout_height="80dp">
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-            <GridView
-                android:id="@+id/gridViewTop"
-                android:layout_gravity="center"
-                android:gravity="center"
-                android:layout_width="1700dp"
-                android:layout_height="match_parent"
-                android:stretchMode="columnWidth"
-                android:numColumns="17"/>
-        </LinearLayout>
-    </HorizontalScrollView>
+<!--    <HorizontalScrollView-->
+<!--        android:id="@+id/hsv1"-->
+<!--        android:background="@color/skyblue"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="80dp">-->
+<!--        <LinearLayout-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="match_parent">-->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerViewTop"
+                android:layout_width="wrap_content"
+                android:layout_height="80dp" />
+<!--        </LinearLayout>-->
+<!--    </HorizontalScrollView>-->
 
     <HorizontalScrollView
         android:id="@+id/hsv2"
-        android:layout_below="@+id/hsv1"
+        android:layout_below="@+id/recyclerViewTop"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
         <LinearLayout

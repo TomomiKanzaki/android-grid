@@ -1,19 +1,22 @@
 package com.example.myapplication_two_way_gridview;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.GridView;
 import android.widget.HorizontalScrollView;
-import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import java.util.List;
 
 public class FragmentMain extends Fragment {
     private final static String INDEX = "index";
@@ -21,16 +24,22 @@ public class FragmentMain extends Fragment {
 
     private float density;
 
+    private List<String> countList;
+    private List<String> timeListShort;
+    private List<String> timeList;
+
+    private View layoutView;
+    private View viewTop;
     private View view;
 
-    private HorizontalScrollView hsv1;
+    private RecyclerView recyclerViewTop;
+    private HorizontalRecyclerViewAdapter recyclerViewAdapterTop;
 
     private RecyclerView recyclerView;
     private RecyclerViewAdapter recyclerViewAdapter;
 
-    private GridView gridViewTop;
+    private RecyclerView gridViewTop;
     private GridView gridView;
-    private GridViewAdapterTop gridViewAdapterTop;
     private GridViewAdapter gridViewAdapter;
 
     public static FragmentMain newInstance(int index) {
@@ -44,6 +53,10 @@ public class FragmentMain extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        countList = new CountList().getCountList();
+        timeListShort = new TimeList().getTimeListShort();
+        timeList = new TimeList().getTimeList();
     }
 
     @Override
@@ -68,79 +81,84 @@ public class FragmentMain extends Fragment {
 
         if (getArguments() == null) return;
 
+        layoutView = view;
+
         density = getResources().getDisplayMetrics().density;
 
-        setGridViewAdapterTop(view, getArguments().getInt(INDEX));
-        setGridViewTopItemClickListener(view);
+        setViewAdapterTop(getArguments().getInt(INDEX));
+        setViewAdapter(getArguments().getInt(INDEX));
 
-        setGridViewAdapter(view, getArguments().getInt(INDEX));
-        setGridViewItemClickListener(view);
+        setRecylerViewTopClickListener();
+        setGridViewItemClickListener();
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
 
-        gridViewAdapterTop = null;
+        recyclerViewAdapterTop = null;
         gridViewAdapter = null;
     }
 
-    private void setGridViewAdapterTop(View v, int index){
-        hsv1 = v.findViewById(R.id.hsv1);
+    private void setViewAdapterTop(int index){
+        if (index != 1){ recyclerViewTop = layoutView.findViewById(R.id.recyclerViewTop); }
         switch (index){
             case 0:{
-                hsv1.setBackgroundResource(R.color.skyblue);
+                recyclerViewTop.setBackgroundResource(R.color.skyblue);
 
-                ViewGroup.LayoutParams lp = hsv1.getLayoutParams();
+                ViewGroup.LayoutParams lp = recyclerViewTop.getLayoutParams();
                 lp.height = (int) (density * 10);
-                hsv1.setLayoutParams(lp);
-
-                gridViewTop = v.findViewById(R.id.gridViewTop);
-                gridViewTop.setVisibility(View.GONE);
+                recyclerViewTop.setLayoutParams(lp);
 
                 break;
             }
             case 1:{
-                hsv1.setBackgroundResource(R.color.gray);
+                viewTop = layoutView.findViewById(R.id.viewTop);
+                viewTop.setBackgroundResource(R.color.gray);
                 break;
             }
             case 2:{
-                hsv1.setBackgroundResource(R.color.purple);
+                recyclerViewTop.setBackgroundResource(R.color.purple);
                 break;
             }
             case 3:{
-                hsv1.setBackgroundResource(R.color.green);
+                recyclerViewTop.setBackgroundResource(R.color.green);
                 break;
             }
             case 4:{
-                hsv1.setBackgroundResource(R.color.orange);
+                recyclerViewTop.setBackgroundResource(R.color.orange);
                 break;
             }
         }
         if (index >= 2){
-            gridViewTop = v.findViewById(R.id.gridViewTop);
-            gridViewAdapterTop = new GridViewAdapterTop(getContext(), new TimeList().getTimeListShort());
-            gridViewTop.setAdapter(gridViewAdapterTop);
+            recyclerViewTop.setHasFixedSize(true);
+
+            RecyclerView.LayoutManager manager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
+//            manager.setOrientation(GridLayoutManager.HORIZONTAL);
+            recyclerViewTop.setLayoutManager(manager);
+
+            recyclerViewAdapterTop = new HorizontalRecyclerViewAdapter(getContext(), timeListShort, density);
+            recyclerViewTop.swapAdapter(recyclerViewAdapterTop, false);
         }
     }
 
-    private void setGridViewAdapter(View v, int index){
+    private void setViewAdapter(int index){
         switch (index) {
             case 0: {
-                gridView = v.findViewById(R.id.gridView);
+                gridView = layoutView.findViewById(R.id.gridView);
 
                 ViewGroup.LayoutParams lp = gridView.getLayoutParams();
                 gridView.setNumColumns(12);
                 lp.width = (int) (density * 100 * 12);
                 gridView.setLayoutParams(lp);
 
-                gridViewAdapter = new GridViewAdapter(getContext(), new CountList().getCountList(), density, GUEST_NUMBER);
+                gridViewAdapter = new GridViewAdapter(getContext(), countList, density, GUEST_NUMBER);
                 gridView.setAdapter(gridViewAdapter);
 
                 break;
             }
             case 1:{
-                recyclerView = v.findViewById(R.id.recycler_view);
+                recyclerView = layoutView.findViewById(R.id.recycler_view);
                 recyclerView.setHasFixedSize(true);
 
                 RecyclerView.LayoutManager rLayoutManager = new LinearLayoutManager(getContext());
@@ -152,14 +170,14 @@ public class FragmentMain extends Fragment {
                 break;
             }
             case 2: case 3: case 4:{
-                gridView = v.findViewById(R.id.gridView);
+                gridView = layoutView.findViewById(R.id.gridView);
 
                 ViewGroup.LayoutParams lp = gridView.getLayoutParams();
                 gridView.setNumColumns(193);
                 lp.width = (int) (density * 100 * 193);
                 gridView.setLayoutParams(lp);
 
-                gridViewAdapter = new GridViewAdapter(getContext(), new TimeList().getTimeList(), density, GUEST_NUMBER);
+                gridViewAdapter = new GridViewAdapter(getContext(), timeList, density, GUEST_NUMBER);
                 gridView.setAdapter(gridViewAdapter);
 
                 break;
@@ -167,18 +185,24 @@ public class FragmentMain extends Fragment {
         }
     }
 
-    private void setGridViewTopItemClickListener(View v){
-        if (gridViewTop == null) return;
-        gridViewTop.setOnItemClickListener((parent, view, position, id) -> {
-            HorizontalScrollView hsv2 = v.findViewById(R.id.hsv2);
-            hsv2.post(() -> hsv2.smoothScrollTo((int) (view.getX() * 12), 0));
-        });
-    }
-    private void setGridViewItemClickListener(View v){
+    private void setGridViewItemClickListener(){
         if (gridView == null) return;
         gridView.setOnItemClickListener((parent, view, position, id) -> {
             Toast.makeText(getContext(), String.valueOf(position), Toast.LENGTH_SHORT).show();
         });
+    }
+
+    private void setRecylerViewTopClickListener() {
+        if (recyclerViewAdapterTop != null){
+            recyclerViewAdapterTop.setOnItemClickListener(new HorizontalRecyclerViewAdapter.onItemClickListener() {
+                @Override
+                public void onClick(View view, int position) {
+                    Log.i("onRecyclerClicked", String.valueOf(view.getX() * position));
+                    HorizontalScrollView hsv2 = layoutView.findViewById(R.id.hsv2);
+                    hsv2.post(() -> hsv2.smoothScrollTo((int) (density * 100 * position * 12), 0));
+                }
+            });
+        }
     }
 }
 
