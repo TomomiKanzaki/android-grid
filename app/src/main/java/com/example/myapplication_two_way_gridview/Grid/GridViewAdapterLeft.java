@@ -1,37 +1,31 @@
-package com.example.myapplication_two_way_gridview;
+package com.example.myapplication_two_way_gridview.Grid;
 
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.myapplication_two_way_gridview.R;
 
 import java.util.List;
 
-/**
- * Created by muhammadchehab on 12/8/17.
- */
-
-public class GridViewAdapter extends BaseAdapter {
+public class GridViewAdapterLeft extends BaseAdapter {
 
     private Context context;
     private List<String> list;
     private float density;
-    private int guestNumber;
 
-    public GridViewAdapter(Context context, List<String> list, float density, int guestNumber){
+    public GridViewAdapterLeft(Context context, List<String> list, float density){
         this.context = context;
         this.list = list;
         this.density = density;
-        this.guestNumber = guestNumber;
     }
 
     @Override
     public int getCount() {
-        return list.size() * guestNumber;
+        return list.size() + 1;
     }
 
     @Override
@@ -58,16 +52,16 @@ public class GridViewAdapter extends BaseAdapter {
         }
         /**convertViewには一列目のみ高さを50dpにしたgridViewが入っており、
          * それを使いまわしているので、スクロールして新たな行が表示された時には高さを戻してやる必要がある*/
-        if (position < list.size()){
+        if (position == 0){
             ViewGroup.LayoutParams lp = viewHolder.tv.getLayoutParams();
             lp.height = (int) (density * 50);
             viewHolder.tv.setLayoutParams(lp);
-            viewHolder.tv.setText(list.get(position));
+            viewHolder.tv.setText("");
         } else {
             ViewGroup.LayoutParams lp = viewHolder.tv.getLayoutParams();
             lp.height = (int) (density * 100);
             viewHolder.tv.setLayoutParams(lp);
-            viewHolder.tv.setText("");
+            viewHolder.tv.setText(list.get(position - 1));
         }
         return convertView;
     }

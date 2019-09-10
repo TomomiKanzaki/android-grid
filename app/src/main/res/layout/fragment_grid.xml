@@ -4,35 +4,60 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:android="http://schemas.android.com/apk/res/android" >
-<!--    <HorizontalScrollView-->
-<!--        android:id="@+id/hsv1"-->
-<!--        android:background="@color/skyblue"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="80dp">-->
-<!--        <LinearLayout-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="match_parent">-->
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recyclerViewTop"
-                android:layout_width="wrap_content"
-                android:layout_height="80dp" />
-<!--        </LinearLayout>-->
-<!--    </HorizontalScrollView>-->
+    <View
+        android:id="@+id/dummyView"
+        android:visibility="gone"
+        android:background="@color/skyblue"
+        android:layout_width="match_parent"
+        android:layout_height="10dp"/>
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewTop"
+        android:layout_below="@+id/dummyView"
+        android:layout_width="wrap_content"
+        android:layout_height="80dp" />
 
+    <com.example.myapplication_two_way_gridview.Scroll.ObservableScrollView
+        android:id="@+id/observable_sv1"
+        android:layout_below="@+id/recyclerViewTop"
+        android:layout_width="150dp"
+        android:layout_height="match_parent">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <GridView
+                android:id="@+id/gridViewLeft"
+                android:numColumns="1"
+                android:stretchMode="columnWidth"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
+
+        </LinearLayout>
+
+    </com.example.myapplication_two_way_gridview.Scroll.ObservableScrollView>
     <HorizontalScrollView
         android:id="@+id/hsv2"
+        android:layout_toRightOf="@+id/observable_sv1"
         android:layout_below="@+id/recyclerViewTop"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
-            <GridView
-                android:id="@+id/gridView"
-                android:layout_width="19300dp"
-                android:layout_height="match_parent"
-                android:numColumns="193"
-                android:stretchMode="columnWidth"/>
+            <com.example.myapplication_two_way_gridview.Scroll.ObservableScrollView
+                android:id="@+id/observable_sv2"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+                    <GridView
+                        android:id="@+id/gridView"
+                        android:layout_width="19300dp"
+                        android:layout_height="match_parent"
+                        android:numColumns="193"
+                        android:stretchMode="columnWidth"/>
+                </LinearLayout>
+            </com.example.myapplication_two_way_gridview.Scroll.ObservableScrollView>
         </LinearLayout>
     </HorizontalScrollView>
 
