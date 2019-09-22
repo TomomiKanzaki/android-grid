@@ -5,9 +5,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.GridView;
-import android.widget.HorizontalScrollView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -15,23 +12,23 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.myapplication_two_way_gridview.Grid.GridViewAdapter;
-import com.example.myapplication_two_way_gridview.Grid.GridViewAdapterLeft;
+import com.celerysoft.tablefixheaders.TableFixHeaders;
 import com.example.myapplication_two_way_gridview.List.CountList;
 import com.example.myapplication_two_way_gridview.List.GuestList;
 import com.example.myapplication_two_way_gridview.List.TimeList;
 import com.example.myapplication_two_way_gridview.Recycler.HorizontalRecyclerViewAdapter;
 import com.example.myapplication_two_way_gridview.Recycler.RecyclerViewAdapter;
-import com.example.myapplication_two_way_gridview.Scroll.ObservableScrollView;
-import com.example.myapplication_two_way_gridview.Scroll.ScrollViewListener;
+import com.example.myapplication_two_way_gridview.Table.MatrixTableAdapter;
 
 import java.util.List;
 
-public class FragmentMain extends Fragment implements ScrollViewListener {
+public class FragmentMain extends Fragment {
     private final static String INDEX = "index";
 
     private float density;
 
+    private String[][] table1;
+    private String[][] table2;
     private List<String> guestList;
     private List<String> countList;
     private List<String> timeListShort;
@@ -47,13 +44,8 @@ public class FragmentMain extends Fragment implements ScrollViewListener {
     private RecyclerView recyclerView;
     private RecyclerViewAdapter recyclerViewAdapter;
 
-    private GridView gridView;
-    private GridView gridViewLeft;
-    private GridViewAdapter gridViewAdapter;
-    private GridViewAdapterLeft gridViewAdapterLeft;
-
-    private ObservableScrollView observableSV1;
-    private ObservableScrollView observableSV2;
+    private TableFixHeaders tableFixHeaders;
+    private MatrixTableAdapter<String> matrixTableAdapter;
 
     public static FragmentMain newInstance(int index)  {
         FragmentMain fragmentMain = new FragmentMain();
@@ -95,13 +87,10 @@ public class FragmentMain extends Fragment implements ScrollViewListener {
 
         density = getResources().getDisplayMetrics().density;
 
-        setObserVableScrollView(getArguments().getInt(INDEX));
-
         setViewAdapterTop(getArguments().getInt(INDEX));
         setViewAdapter(getArguments().getInt(INDEX));
 
         setRecylerViewTopClickListener();
-        setGridViewItemClickListener();
     }
 
     @Override
@@ -109,8 +98,7 @@ public class FragmentMain extends Fragment implements ScrollViewListener {
         super.onDestroyView();
 
         recyclerViewAdapterTop = null;
-        gridViewAdapter = null;
-        gridViewAdapterLeft = null;
+        tableFixHeaders = null;
     }
 
     private void setViewAdapterTop(int index){
@@ -153,24 +141,20 @@ public class FragmentMain extends Fragment implements ScrollViewListener {
     private void setViewAdapter(int index){
         switch (index) {
             case 0: {
-                gridView = layoutView.findViewById(R.id.gridView);
-                gridViewLeft = layoutView.findViewById(R.id.gridViewLeft);
+                table1 = new String[guestList.size()][countList.size()];
+                tableFixHeaders = layoutView.findViewById(R.id.table);
 
-                ViewGroup.LayoutParams lp = gridView.getLayoutParams();
-                gridView.setNumColumns(12);
-                lp.width = (int) (density * 100 * 12);
-                lp.height = (int)(density * 100 * guestList.size() + 1);
-                gridView.setLayoutParams(lp);
-
-                lp = gridViewLeft.getLayoutParams();
-                lp.height = (int)(density * 100 * (guestList.size() + 1));
-                gridViewLeft.setLayoutParams(lp);
-
-                gridViewAdapter = new GridViewAdapter(getContext(), countList, density, guestList.size());
-                gridView.setAdapter(gridViewAdapter);
-
-                gridViewAdapterLeft = new GridViewAdapterLeft(getContext(), guestList, density);
-                gridViewLeft.setAdapter(gridViewAdapterLeft);
+                matrixTableAdapter = new MatrixTableAdapter<String>(getContext(), table1, (int) density, guestList, countList);
+                tableFixHeaders.setRowSelectable(false);
+                tableFixHeaders.setAdapter(matrixTableAdapter);
+                tableFixHeaders.setOnItemClickListener((parent, view, row, column, id) -> {
+                    try{
+                        matrixTableAdapter.table[row - 1][column - 1] = "row: "+row + "\n" + " column: " + column;
+                        matrixTableAdapter.notifyDataSetChanged();
+                    } catch (Exception e){
+                        Log.e("Exception: ", String.valueOf(e));
+                    }
+                });
 
                 break;
             }
@@ -187,63 +171,36 @@ public class FragmentMain extends Fragment implements ScrollViewListener {
                 break;
             }
             case 2: case 3: case 4:{
-                gridView = layoutView.findViewById(R.id.gridView);
-                gridViewLeft = layoutView.findViewById(R.id.gridViewLeft);
 
-                ViewGroup.LayoutParams lp = gridView.getLayoutParams();
-                gridView.setNumColumns(timeList.size());
-                lp.width = (int) (density * 100 * timeList.size());
-                lp.height = (int)(density * 100 * guestList.size());
-                gridView.setLayoutParams(lp);
+                table2 = new String[guestList.size()][timeList.size()];
+                TableFixHeaders tableFixHeaders = layoutView.findViewById(R.id.table);
 
-                lp = gridViewLeft.getLayoutParams();
-                lp.height = (int)(density * 100 * (guestList.size() + 1));
-                gridViewLeft.setLayoutParams(lp);
+                matrixTableAdapter = new MatrixTableAdapter<String>(getContext(), table2, (int) density, guestList, timeList);
+                tableFixHeaders.setRowSelectable(false);
+                tableFixHeaders.setAdapter(matrixTableAdapter);
 
-                gridViewAdapter = new GridViewAdapter(getContext(), timeList, density, guestList.size());
-                gridView.setAdapter(gridViewAdapter);
-
-                gridViewAdapterLeft = new GridViewAdapterLeft(getContext(), guestList, density);
-                gridViewLeft.setAdapter(gridViewAdapterLeft);
-
+                tableFixHeaders.setOnItemClickListener((parent, view, row, column, id) -> {
+                    try{
+                        matrixTableAdapter.table[row - 1][column - 1] = "row: "+row + "\n" + " column: " + column;
+                        matrixTableAdapter.notifyDataSetChanged();
+                    } catch (Exception e){
+                        Log.e("Exception: ", String.valueOf(e));
+                    }
+                });
                 break;
             }
         }
     }
 
-    private void setGridViewItemClickListener(){
-        if (gridView == null) return;
-        gridView.setOnItemClickListener((parent, view, position, id) -> {
-            Toast.makeText(getContext(), String.valueOf(position), Toast.LENGTH_SHORT).show();
-        });
-    }
-
     private void setRecylerViewTopClickListener() {
         if (recyclerViewAdapterTop != null){
-            recyclerViewAdapterTop.setOnItemClickListener(new HorizontalRecyclerViewAdapter.onItemClickListener() {
-                @Override
-                public void onClick(View view, int position) {
-                    HorizontalScrollView hsv2 = layoutView.findViewById(R.id.hsv2);
-                    hsv2.post(() -> hsv2.smoothScrollTo((int) (density * 100 * position * 12), 0));
+            recyclerViewAdapterTop.setOnItemClickListener((view, position) -> {
+                if (tableFixHeaders == null) {
+                    tableFixHeaders = layoutView.findViewById(R.id.table);
                 }
+                int destination = (int) (density * 100 * position * 12);
+                tableFixHeaders.scrollTo(destination,0);
             });
-        }
-    }
-
-    private void setObserVableScrollView(int index){
-        if (index == 1)return;
-        observableSV1 = layoutView.findViewById(R.id.observable_sv1);
-        observableSV1.setScrollViewListener(this);
-        observableSV2 = layoutView.findViewById(R.id.observable_sv2);
-        observableSV2.setScrollViewListener(this);
-    }
-
-    @Override
-    public void onScrollChanged(ObservableScrollView scrollView, int x, int y, int oldx, int oldy) {
-        if (scrollView == observableSV1){
-            observableSV2.smoothScrollTo(x, y);
-        } else if (scrollView == observableSV2){
-            observableSV1.smoothScrollTo(x, y);
         }
     }
 }
