@@ -1139,14 +1139,13 @@ public class TableFixHeaders extends ViewGroup {
 			if (scroller.isFinished()) {
 				return;
 			}
-
 			boolean more = scroller.computeScrollOffset();
 			int x = scroller.getCurrX();
 			int y = scroller.getCurrY();
 			int diffX = lastX - x;
 			int diffY = lastY - y;
 			if (diffX != 0 || diffY != 0) {
-				scrollBy(diffX, diffY);
+				scrollBy(diffX * 5, diffY * 5);
 				lastX = x;
 				lastY = y;
 			}
