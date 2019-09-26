@@ -1145,7 +1145,8 @@ public class TableFixHeaders extends ViewGroup {
 			int diffX = lastX - x;
 			int diffY = lastY - y;
 			if (diffX != 0 || diffY != 0) {
-				scrollBy(diffX * 5, diffY * 5);
+				if (diffX < 5 && diffY < 5){ scrollBy(diffX, diffY); }
+				else { scrollBy(diffX * 5, diffY * 5); }
 				lastX = x;
 				lastY = y;
 			}
