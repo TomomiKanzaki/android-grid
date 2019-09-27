@@ -1,4 +1,4 @@
-package com.example.myapplication_two_way_gridview;
+package com.example.myapplication_two_way_gridview.List;
 
 import java.util.ArrayList;
 import java.util.List;

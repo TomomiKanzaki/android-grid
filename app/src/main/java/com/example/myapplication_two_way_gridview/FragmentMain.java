@@ -1,13 +1,10 @@
 package com.example.myapplication_two_way_gridview;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.GridView;
-import android.widget.HorizontalScrollView;
-import android.widget.RelativeLayout;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -15,25 +12,42 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.celerysoft.tablefixheaders.TableFixHeaders;
+import com.example.myapplication_two_way_gridview.List.CountList;
+import com.example.myapplication_two_way_gridview.List.GuestList;
+import com.example.myapplication_two_way_gridview.List.TimeList;
+import com.example.myapplication_two_way_gridview.Recycler.HorizontalRecyclerViewAdapter;
+import com.example.myapplication_two_way_gridview.Recycler.RecyclerViewAdapter;
+import com.example.myapplication_two_way_gridview.Table.MatrixTableAdapter;
+
+import java.util.List;
+
 public class FragmentMain extends Fragment {
     private final static String INDEX = "index";
-    private final static int GUEST_NUMBER = 10;
 
     private float density;
 
+    private String[][] table1;
+    private String[][] table2;
+    private List<String> guestList;
+    private List<String> countList;
+    private List<String> timeListShort;
+    private List<String> timeList;
+
+    private View layoutView;
+    private View viewTop;
     private View view;
 
-    private HorizontalScrollView hsv1;
+    private RecyclerView recyclerViewTop;
+    private HorizontalRecyclerViewAdapter recyclerViewAdapterTop;
 
     private RecyclerView recyclerView;
     private RecyclerViewAdapter recyclerViewAdapter;
 
-    private GridView gridViewTop;
-    private GridView gridView;
-    private GridViewAdapterTop gridViewAdapterTop;
-    private GridViewAdapter gridViewAdapter;
+    private TableFixHeaders tableFixHeaders;
+    private MatrixTableAdapter<String> matrixTableAdapter;
 
-    public static FragmentMain newInstance(int index) {
+    public static FragmentMain newInstance(int index)  {
         FragmentMain fragmentMain = new FragmentMain();
         Bundle b = new Bundle();
         b.putInt(INDEX, index);
@@ -44,22 +58,23 @@ public class FragmentMain extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        guestList = new GuestList().getGuestList();
+        countList = new CountList().getCountList();
+        timeListShort = new TimeList().getTimeListShort();
+        timeList = new TimeList().getTimeList();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        switch (getArguments().getInt(INDEX)){
-            case 0:case 2:case 3:case 4:{
-                view = inflater.inflate(R.layout.fragment_grid, null);
-                break;
-            }
-            case 1:{
-                view = inflater.inflate(R.layout.fragment_recycler, null);
-                break;
-            }
+        if (getArguments().getInt(INDEX) == 1){
+            view = inflater.inflate(R.layout.fragment_recycler, null);
+            return view;
+        } else {
+            view = inflater.inflate(R.layout.fragment_grid, null);
+            return view;
         }
-        return view;
     }
 
     @Override
@@ -68,117 +83,125 @@ public class FragmentMain extends Fragment {
 
         if (getArguments() == null) return;
 
+        layoutView = view;
+
         density = getResources().getDisplayMetrics().density;
 
-        setGridViewAdapterTop(view, getArguments().getInt(INDEX));
-        setGridViewTopItemClickListener(view);
+        setViewAdapterTop(getArguments().getInt(INDEX));
+        setViewAdapter(getArguments().getInt(INDEX));
 
-        setGridViewAdapter(view, getArguments().getInt(INDEX));
-        setGridViewItemClickListener(view);
+        setRecylerViewTopClickListener();
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
 
-        gridViewAdapterTop = null;
-        gridViewAdapter = null;
+        recyclerViewAdapterTop = null;
+        tableFixHeaders = null;
     }
 
-    private void setGridViewAdapterTop(View v, int index){
-        hsv1 = v.findViewById(R.id.hsv1);
+    private void setViewAdapterTop(int index){
+        if (index != 1){ recyclerViewTop = layoutView.findViewById(R.id.recyclerViewTop); }
         switch (index){
             case 0:{
-                hsv1.setBackgroundResource(R.color.skyblue);
-
-                ViewGroup.LayoutParams lp = hsv1.getLayoutParams();
-                lp.height = (int) (density * 10);
-                hsv1.setLayoutParams(lp);
-
-                gridViewTop = v.findViewById(R.id.gridViewTop);
-                gridViewTop.setVisibility(View.GONE);
-
+                recyclerViewTop.setVisibility(View.GONE);
+                layoutView.findViewById(R.id.dummyView).setVisibility(View.VISIBLE);
                 break;
             }
             case 1:{
-                hsv1.setBackgroundResource(R.color.gray);
+                viewTop = layoutView.findViewById(R.id.viewTop);
+                viewTop.setBackgroundResource(R.color.gray);
                 break;
             }
             case 2:{
-                hsv1.setBackgroundResource(R.color.purple);
+                recyclerViewTop.setBackgroundResource(R.color.purple);
                 break;
             }
             case 3:{
-                hsv1.setBackgroundResource(R.color.green);
+                recyclerViewTop.setBackgroundResource(R.color.green);
                 break;
             }
             case 4:{
-                hsv1.setBackgroundResource(R.color.orange);
+                recyclerViewTop.setBackgroundResource(R.color.orange);
                 break;
             }
         }
         if (index >= 2){
-            gridViewTop = v.findViewById(R.id.gridViewTop);
-            gridViewAdapterTop = new GridViewAdapterTop(getContext(), new TimeList().getTimeListShort());
-            gridViewTop.setAdapter(gridViewAdapterTop);
+            recyclerViewTop.setHasFixedSize(true);
+
+            RecyclerView.LayoutManager manager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
+            recyclerViewTop.setLayoutManager(manager);
+
+            recyclerViewAdapterTop = new HorizontalRecyclerViewAdapter(getContext(), timeListShort, density);
+            recyclerViewTop.swapAdapter(recyclerViewAdapterTop, false);
         }
     }
 
-    private void setGridViewAdapter(View v, int index){
+    private void setViewAdapter(int index){
         switch (index) {
             case 0: {
-                gridView = v.findViewById(R.id.gridView);
+                table1 = new String[guestList.size()][countList.size()];
+                tableFixHeaders = layoutView.findViewById(R.id.table);
 
-                ViewGroup.LayoutParams lp = gridView.getLayoutParams();
-                gridView.setNumColumns(12);
-                lp.width = (int) (density * 100 * 12);
-                gridView.setLayoutParams(lp);
-
-                gridViewAdapter = new GridViewAdapter(getContext(), new CountList().getCountList(), density, GUEST_NUMBER);
-                gridView.setAdapter(gridViewAdapter);
+                matrixTableAdapter = new MatrixTableAdapter<String>(getContext(), table1, (int) density, guestList, countList);
+                tableFixHeaders.setRowSelectable(false);
+                tableFixHeaders.setAdapter(matrixTableAdapter);
+                tableFixHeaders.setOnItemClickListener((parent, view, row, column, id) -> {
+                    try{
+                        matrixTableAdapter.table[row - 1][column - 1] = "row: "+row + "\n" + " column: " + column;
+                        matrixTableAdapter.notifyDataSetChanged();
+                    } catch (Exception e){
+                        Log.e("Exception: ", String.valueOf(e));
+                    }
+                });
 
                 break;
             }
             case 1:{
-                recyclerView = v.findViewById(R.id.recycler_view);
+                recyclerView = layoutView.findViewById(R.id.recycler_view);
                 recyclerView.setHasFixedSize(true);
 
                 RecyclerView.LayoutManager rLayoutManager = new LinearLayoutManager(getContext());
                 recyclerView.setLayoutManager(rLayoutManager);
 
-                recyclerViewAdapter = new RecyclerViewAdapter(getContext(), GUEST_NUMBER);
+                recyclerViewAdapter = new RecyclerViewAdapter(getContext(), guestList.size());
                 recyclerView.setAdapter(recyclerViewAdapter);
 
                 break;
             }
             case 2: case 3: case 4:{
-                gridView = v.findViewById(R.id.gridView);
 
-                ViewGroup.LayoutParams lp = gridView.getLayoutParams();
-                gridView.setNumColumns(193);
-                lp.width = (int) (density * 100 * 193);
-                gridView.setLayoutParams(lp);
+                table2 = new String[guestList.size()][timeList.size()];
+                TableFixHeaders tableFixHeaders = layoutView.findViewById(R.id.table);
 
-                gridViewAdapter = new GridViewAdapter(getContext(), new TimeList().getTimeList(), density, GUEST_NUMBER);
-                gridView.setAdapter(gridViewAdapter);
+                matrixTableAdapter = new MatrixTableAdapter<String>(getContext(), table2, (int) density, guestList, timeList);
+                tableFixHeaders.setRowSelectable(false);
+                tableFixHeaders.setAdapter(matrixTableAdapter);
 
+                tableFixHeaders.setOnItemClickListener((parent, view, row, column, id) -> {
+                    try{
+                        matrixTableAdapter.table[row - 1][column - 1] = "row: "+row + "\n" + " column: " + column;
+                        matrixTableAdapter.notifyDataSetChanged();
+                    } catch (Exception e){
+                        Log.e("Exception: ", String.valueOf(e));
+                    }
+                });
                 break;
             }
         }
     }
 
-    private void setGridViewTopItemClickListener(View v){
-        if (gridViewTop == null) return;
-        gridViewTop.setOnItemClickListener((parent, view, position, id) -> {
-            HorizontalScrollView hsv2 = v.findViewById(R.id.hsv2);
-            hsv2.post(() -> hsv2.smoothScrollTo((int) (view.getX() * 12), 0));
-        });
-    }
-    private void setGridViewItemClickListener(View v){
-        if (gridView == null) return;
-        gridView.setOnItemClickListener((parent, view, position, id) -> {
-            Toast.makeText(getContext(), String.valueOf(position), Toast.LENGTH_SHORT).show();
-        });
+    private void setRecylerViewTopClickListener() {
+        if (recyclerViewAdapterTop != null){
+            recyclerViewAdapterTop.setOnItemClickListener((view, position) -> {
+                if (tableFixHeaders == null) {
+                    tableFixHeaders = layoutView.findViewById(R.id.table);
+                }
+                int destination = tableFixHeaders.getChildAt(0).getWidth() * position * 12;
+                tableFixHeaders.scrollTo(destination,0);
+            });
+        }
     }
 }
 
