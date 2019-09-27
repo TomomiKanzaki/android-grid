@@ -134,7 +134,7 @@ public class TableFixHeaders extends ViewGroup {
 
 		createShadows(context);
 
-		this.shadowSize = getResources().getDimensionPixelSize(R.dimen.shadow_size);
+		this.shadowSize = 0;//getResources().getDimensionPixelSize(R.dimen.shadow_size);
 
 		this.flinger = new Flinger(context);
 		final ViewConfiguration configuration = ViewConfiguration.get(context);
