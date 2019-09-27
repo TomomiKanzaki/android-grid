@@ -198,7 +198,7 @@ public class FragmentMain extends Fragment {
                 if (tableFixHeaders == null) {
                     tableFixHeaders = layoutView.findViewById(R.id.table);
                 }
-                int destination = (int) (density * 100 * position * 12);
+                int destination = tableFixHeaders.getChildAt(0).getWidth() * position * 12;
                 tableFixHeaders.scrollTo(destination,0);
             });
         }
