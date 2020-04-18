@@ -29,7 +29,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerViewHolder holder, int position) {
-        holder.tvSub.setText("teacher");
+        holder.tvSub.setText("sample" + position);
         holder.tvMain.setText(String.valueOf(position));
     }
 
